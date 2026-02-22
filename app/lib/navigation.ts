@@ -22,6 +22,8 @@ export const navigation: NavCategory[] = [
       { title: "Navigating", slug: "navigating" },
       { title: "Pending UI", slug: "pending-ui" },
       { title: "Testing", slug: "testing" },
+      { title: "Streaming SSR", slug: "streaming-ssr" },
+      { title: "SSR 배포 아키텍처", slug: "deployment-architecture" },
     ],
   },
   {
