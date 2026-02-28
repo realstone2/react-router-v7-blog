@@ -1,9 +1,9 @@
 ---
-title: "Actions"
-date: "2026-02-22"
-description: "React Router v7에서 action을 사용한 데이터 변경 처리"
-tags: ["react-router", "actions", "forms"]
-category: "core-concepts"
+title: 'Actions'
+date: '2026-02-22'
+description: 'React Router v7에서 action을 사용한 데이터 변경 처리'
+tags: ['react-router', 'actions', 'forms']
+category: 'core-concepts'
 order: 5
 ---
 
@@ -19,12 +19,15 @@ RR v7에서 데이터 뮤테이션은 **Route action**을 통해 이루어진다
 
 - `action` → 서버에서만 실행, 클라이언트 번들에서 제거됨
 - `clientAction` → 브라우저에서만 실행, 둘 다 정의 시 우선순위 가짐
+- 제출 결과를 컴포넌트에서 읽을 때는 `useActionData`(또는 타입드 라우트의 `Route.ComponentProps.actionData`)를 사용
 
 ---
 
 # clientAction vs action
 
 ## clientAction (브라우저 전용)
+
+클라이언트 작업은 브라우저에서만 실행되며, 서버 작업보다 우선순위를 가진다.
 
 ```typescript
 // route('/projects/:projectId', './project.tsx')
@@ -55,29 +58,67 @@ export default function Project({ actionData }: Route.ComponentProps) {
 ## action (서버 전용)
 
 ```typescript
-import { fakeDb } from "../db"; // DB 접근 코드 — 클라이언트 번들에 포함되지 않음
+import { fakeDb } from '../db'; // DB 접근 코드 — 클라이언트 번들에 포함되지 않음
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const title = formData.get("title");
+  const title = formData.get('title');
   const project = await fakeDb.updateProject({ title }); // 서버에서 직접 DB 접근
   return project;
 }
 ```
 
-| | `action` | `clientAction` |
-|---|---|---|
-| 실행 위치 | 서버 | 브라우저 |
-| 클라이언트 번들 | 포함 안 됨 | 포함됨 |
-| DB/시크릿 키 사용 | 안전 | 노출 위험 |
-| 둘 다 정의 시 | 무시됨 | 우선 실행 |
-| actionData | `Route.ComponentProps`로 수신 | 동일 |
+## action vs clientAction
+
+|                   | `action`                                               | `clientAction` |
+| ----------------- | ------------------------------------------------------ | -------------- |
+| 실행 위치         | 서버                                                   | 브라우저       |
+| 클라이언트 번들   | 포함 안 됨                                             | 포함됨         |
+| DB/시크릿 키 사용 | 안전                                                   | 노출 위험      |
+| 둘 다 정의 시     | 무시됨                                                 | 우선 실행      |
+| 결과 읽기         | `useActionData` 또는 `Route.ComponentProps.actionData` | 동일           |
+
+## `useActionData` 기본 사용
+
+`action`/`clientAction`이 `return`한 값은 해당 라우트 컴포넌트에서 `useActionData<typeof action>()`로 읽을 수 있다.
+단, 가장 최근 제출 결과만 유지되며 새 제출이 성공하면 이전 actionData는 덮어써진다.
+
+```typescript
+import { Form, useActionData } from "react-router";
+
+type ActionResult =
+  | { ok: true; message: string }
+  | { ok: false; error: string };
+
+export async function action(): Promise<ActionResult> {
+  return { ok: true, message: "저장 완료" };
+}
+
+export default function ProjectForm() {
+  const actionData = useActionData<typeof action>();
+
+  return (
+    <>
+      <Form method="post">
+        <button type="submit">저장</button>
+      </Form>
+      {actionData?.ok ? <p>{actionData.message}</p> : null}
+      {actionData && !actionData.ok ? <p>{actionData.error}</p> : null}
+    </>
+  );
+}
+```
+
+- 페이지 최초 로드 시 `actionData`는 `undefined`
+- 같은 라우트에서 발생한 가장 최근 제출 결과를 반환
+- 리다이렉트(`redirect`)를 반환한 경우 현재 화면에는 actionData가 남지 않음
+- `actionData`는 캐시가 아니라 **최근 제출 결과 스냅샷**이며, 지속적인 서버 상태 관리는 loader/useQuery가 담당
 
 ---
 
 # Action 호출 방법 3가지
 
-## 1. `<Form>` — 선언적 (네비게이션 발생)
+## 1. `Form` — 선언적 (네비게이션 발생)
 
 ```typescript
 import { Form } from "react-router";
@@ -98,16 +139,13 @@ function SomeComponent() {
 ## 2. `useSubmit` — 명령적 (네비게이션 발생)
 
 ```typescript
-import { useSubmit } from "react-router";
+import { useSubmit } from 'react-router';
 
 function useQuizTimer() {
   const submit = useSubmit();
 
   const cb = useCallback(() => {
-    submit(
-      { quizTimedOut: true },
-      { action: "/end-quiz", method: "post" },
-    );
+    submit({ quizTimedOut: true }, { action: '/end-quiz', method: 'post' });
   }, []);
 
   useFakeTimer(10 * 60 * 1000, cb); // 10분 후 자동 제출
@@ -145,35 +183,55 @@ fetcher.submit(
 - **URL 변경 없음**, history에 항목 추가 안 함
 - 독립적인 `fetcher.state`로 개별 pending UI 가능
 - 여러 개 동시 실행 가능
+- 이 경우 결과는 `useActionData`가 아니라 `fetcher.data`로 읽어야 함
 
 ## 호출 방법 비교
 
-| | `<Form>` | `useSubmit` | `fetcher.Form` |
-|---|---|---|---|
-| 네비게이션 | 발생 | 발생 | 없음 |
-| 방식 | 선언적 | 명령적 | 선언적/명령적 |
-| 주요 용도 | 일반 폼 제출 | 타이머/이벤트 기반 | 인라인 뮤테이션 |
-| loader 재검증 | 자동 | 자동 | 자동 |
+|               | `<Form>`     | `useSubmit`        | `fetcher.Form`  |
+| ------------- | ------------ | ------------------ | --------------- |
+| 네비게이션    | 발생         | 발생               | 없음            |
+| 방식          | 선언적       | 명령적             | 선언적/명령적   |
+| 주요 용도     | 일반 폼 제출 | 타이머/이벤트 기반 | 인라인 뮤테이션 |
+| loader 재검증 | 자동         | 자동               | 자동            |
 
 ---
 
 # TanStack Query와의 관계
 
 action이 완료되면 RR v7이 loader를 자동 재검증한다.
-TanStack Query와 함께 쓸 때는 **action 내에서 `queryClient.invalidateQueries`를 수동으로 호출**해야 TQ 캐시도 갱신된다.
+TanStack Query 캐시는 별도 시스템이므로, 클라이언트의 `queryClient`가 있는 위치에서 수동으로 무효화해야 한다.
+즉, 서버 `action`의 자동 재검증과 TanStack Query의 캐시 무효화는 서로 다른 메커니즘이다.
 
 ```typescript
-export async function action({ request }: Route.ActionArgs) {
+export async function clientAction({ request }: Route.ClientActionArgs) {
   const formData = await request.formData();
-  await fakeDb.updateProject(Object.fromEntries(formData));
+  await updateProject(Object.fromEntries(formData));
 
   // RR v7 loader 재검증은 자동
-  // TanStack Query 캐시는 수동 무효화 필요
-  await queryClient.invalidateQueries({ queryKey: ["projects"] });
+  // TanStack Query 캐시는 클라이언트에서 수동 무효화
+  await queryClient.invalidateQueries({ queryKey: ['projects'] });
 
   return { ok: true };
 }
 ```
+
+---
+
+# React Router Action 패턴 vs `useMutation`
+
+|                    | React Router action 패턴 (`<Form>`/`useSubmit`/`fetcher`) | `useMutation` (TanStack Query)                         |
+| ------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
+| 실행 주체          | React Router 라우트 제출 흐름                             | 컴포넌트/훅에서 직접 호출                              |
+| 서버 실행 지원     | `action`을 쓰면 서버에서 실행(클라이언트 번들 제외)       | 기본적으로 브라우저에서 실행(서버 함수 직접 실행 아님) |
+| 보안/비밀값 처리   | DB 접근, 시크릿 키 처리에 유리(`action`)                  | 시크릿 키/DB 직접 접근 로직을 둘 수 없음               |
+| 상태 읽기          | `useActionData`, `useNavigation`, `fetcher.state`         | `data`, `error`, `isPending`, `isSuccess`              |
+| 결과 데이터 성격   | 최근 제출 1회 결과(캐시 아님)                             | mutation 상태 객체를 훅이 지속 관리                    |
+| 캐시 동기화        | loader 재검증 자동                                        | `invalidateQueries` 등 직접 설계                       |
+| 네트워크 경로 관점 | `<Form>`/`submit` → 라우트 action 처리(라우터 중심)       | `mutationFn` 안에서 API 엔드포인트를 직접 호출         |
+| 고급 기능          | 폼/리다이렉트 중심, 단순한 흐름                           | retry, optimistic update, rollback에 강점              |
+| 적합한 경우        | 라우트 폼 제출, 서버 액션 중심 앱                         | 복잡한 클라이언트 캐시 제어가 필요한 앱                |
+
+참고: `useActionData`는 위 action 패턴에서 "제출 결과를 읽는 훅"이고, `useMutation`은 "클라이언트 mutation 상태를 관리하는 훅"이다.
 
 ---
 
@@ -182,6 +240,17 @@ export async function action({ request }: Route.ActionArgs) {
 > **action = 서버 전용 뮤테이션, clientAction = 브라우저 전용 뮤테이션**
 > 완료 시 모든 loader 자동 재검증 → UI 자동 동기화
 >
+> 결과 읽기:
+>
+> - 라우트 제출 결과는 `useActionData`(또는 `Route.ComponentProps.actionData`)
+> - fetcher 제출 결과는 `fetcher.data`
+>
 > 호출 방법:
+>
 > - `<Form>` / `useSubmit` → 네비게이션 O
 > - `fetcher.Form` / `fetcher.submit` → 네비게이션 X, 인라인 뮤테이션
+>
+> 선택 기준:
+>
+> - 서버에서 안전하게 처리해야 하는 폼 제출/리다이렉트 흐름이면 `action/useActionData`
+> - 낙관적 업데이트/재시도/세밀한 캐시 제어가 핵심이면 `useMutation`
