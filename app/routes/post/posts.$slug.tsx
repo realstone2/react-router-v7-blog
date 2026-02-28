@@ -1,6 +1,6 @@
 import type { Route } from './+types/posts.$slug';
 import { getPost } from '~/lib/posts.server';
-import { getPrevNext } from '~/lib/navigation';
+import { getPrevNext } from '~/lib/navigation.server';
 import { DocsLayout } from '~/components/docs-layout';
 import { PrevNextNav } from '~/components/prev-next-nav';
 
