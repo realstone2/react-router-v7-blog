@@ -22,6 +22,16 @@ export interface Post extends PostMeta {
 
 const postsDir = path.join(process.cwd(), "content", "posts");
 
+function findPostFile(slug: string): string | null {
+  const entries = fs.readdirSync(postsDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const filePath = path.join(postsDir, entry.name, `${slug}.md`);
+    if (fs.existsSync(filePath)) return filePath;
+  }
+  return null;
+}
+
 function escapeHtml(text: string): string {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -49,23 +59,28 @@ function parsePostMeta(slug: string, data: Record<string, unknown>): PostMeta {
 }
 
 export function getPosts(): PostMeta[] {
-  const files = fs.readdirSync(postsDir);
-  const posts = files
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => {
+  const entries = fs.readdirSync(postsDir, { withFileTypes: true });
+  const posts: PostMeta[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const categoryDir = path.join(postsDir, entry.name);
+    const files = fs.readdirSync(categoryDir).filter((f) => f.endsWith(".md"));
+    for (const f of files) {
       const slug = f.replace(/\.md$/, "");
-      const raw = fs.readFileSync(path.join(postsDir, f), "utf-8");
+      const raw = fs.readFileSync(path.join(categoryDir, f), "utf-8");
       const { data } = matter(raw);
-      return parsePostMeta(slug, data);
-    });
+      posts.push(parsePostMeta(slug, data));
+    }
+  }
 
   return posts.sort((a, b) => a.order - b.order);
 }
 
 export async function getPost(slug: string): Promise<Post | null> {
   if (!/^[a-z0-9-]+$/.test(slug)) return null;
-  const filePath = path.join(postsDir, `${slug}.md`);
-  if (!fs.existsSync(filePath)) return null;
+  const filePath = findPostFile(slug);
+  if (!filePath) return null;
 
   const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content: body } = matter(raw);

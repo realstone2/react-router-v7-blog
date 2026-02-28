@@ -10,9 +10,14 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { getNavigation } from "~/lib/navigation.server";
 import { ThemeToggle } from "~/components/theme-toggle";
 import { MobileNav } from "~/components/mobile-nav";
 import "./app.css";
+
+export function loader() {
+  return { navigation: getNavigation() };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

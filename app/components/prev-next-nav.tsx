@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import type { NavItem } from '~/lib/navigation';
+import type { NavItem } from '~/lib/navigation.server';
 
 interface PrevNextNavProps {
   prev: NavItem | null;

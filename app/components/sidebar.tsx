@@ -1,11 +1,14 @@
-import { NavLink } from "react-router";
-import { navigation } from "~/lib/navigation";
+import { NavLink, useRouteLoaderData } from "react-router";
+import type { NavCategory } from "~/lib/navigation.server";
 
 interface SidebarProps {
   onNavigate?: () => void;
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
+  const data = useRouteLoaderData("root") as { navigation: NavCategory[] } | undefined;
+  const navigation = data?.navigation ?? [];
+
   return (
     <nav className="py-8 pr-4 space-y-8">
       {navigation.map((category) => (
