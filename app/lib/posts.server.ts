@@ -1,9 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
-import { Marked } from "marked";
-import { getHighlighter } from "~/lib/shiki.server";
-import { extractToc, type TocItem } from "~/lib/toc.server";
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
+import { Marked } from 'marked';
+import { getHighlighter } from '~/lib/shiki.server';
+import { extractToc, type TocItem } from '~/lib/toc.server';
 
 export interface PostMeta {
   slug: string;
@@ -20,7 +20,7 @@ export interface Post extends PostMeta {
   toc: TocItem[];
 }
 
-const postsDir = path.join(process.cwd(), "content", "posts");
+const postsDir = path.join(process.cwd(), 'content', 'posts');
 
 function findPostFile(slug: string): string | null {
   const entries = fs.readdirSync(postsDir, { withFileTypes: true });
@@ -33,28 +33,28 @@ function findPostFile(slug: string): string | null {
 }
 
 function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/<[^>]*>/g, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
+    .replace(/<[^>]*>/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
     .trim();
 }
 
 function parsePostMeta(slug: string, data: Record<string, unknown>): PostMeta {
   return {
     slug,
-    title: typeof data.title === "string" ? data.title : slug,
-    date: typeof data.date === "string" ? data.date : "",
-    description: typeof data.description === "string" ? data.description : "",
+    title: typeof data.title === 'string' ? data.title : slug,
+    date: typeof data.date === 'string' ? data.date : '',
+    description: typeof data.description === 'string' ? data.description : '',
     tags: Array.isArray(data.tags) ? data.tags : [],
-    category: typeof data.category === "string" ? data.category : "uncategorized",
-    order: typeof data.order === "number" ? data.order : 999,
+    category: typeof data.category === 'string' ? data.category : 'uncategorized',
+    order: typeof data.order === 'number' ? data.order : 999,
   };
 }
 
@@ -65,10 +65,10 @@ export function getPosts(): PostMeta[] {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const categoryDir = path.join(postsDir, entry.name);
-    const files = fs.readdirSync(categoryDir).filter((f) => f.endsWith(".md"));
+    const files = fs.readdirSync(categoryDir).filter(f => f.endsWith('.md'));
     for (const f of files) {
-      const slug = f.replace(/\.md$/, "");
-      const raw = fs.readFileSync(path.join(categoryDir, f), "utf-8");
+      const slug = f.replace(/\.md$/, '');
+      const raw = fs.readFileSync(path.join(categoryDir, f), 'utf-8');
       const { data } = matter(raw);
       posts.push(parsePostMeta(slug, data));
     }
@@ -77,12 +77,14 @@ export function getPosts(): PostMeta[] {
   return posts.sort((a, b) => a.order - b.order);
 }
 
+// const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export async function getPost(slug: string): Promise<Post | null> {
+  // await sleep(3000);
   if (!/^[a-z0-9-]+$/.test(slug)) return null;
   const filePath = findPostFile(slug);
   if (!filePath) return null;
 
-  const raw = fs.readFileSync(filePath, "utf-8");
+  const raw = fs.readFileSync(filePath, 'utf-8');
   const { data, content: body } = matter(raw);
 
   const highlighter = await getHighlighter();
@@ -103,13 +105,13 @@ export async function getPost(slug: string): Promise<Post | null> {
         return `<h${depth} id="${id}">${text}</h${depth}>\n`;
       },
       code({ text, lang }) {
-        const language = lang || "text";
+        const language = lang || 'text';
         try {
           return highlighter.codeToHtml(text, {
             lang: language,
             themes: {
-              light: "github-light",
-              dark: "github-dark",
+              light: 'github-light',
+              dark: 'github-dark',
             },
             defaultColor: false,
           });

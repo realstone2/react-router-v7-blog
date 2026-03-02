@@ -1,6 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
+import fs from 'node:fs';
+import path from 'node:path';
+import matter from 'gray-matter';
 
 export interface NavItem {
   title: string;
@@ -12,13 +12,13 @@ export interface NavCategory {
   items: NavItem[];
 }
 
-const postsDir = path.join(process.cwd(), "content", "posts");
+const postsDir = path.join(process.cwd(), 'content', 'posts');
 
 function toLabel(folderName: string): string {
   return folderName
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 let cachedNavigation: NavCategory[] | null = null;
@@ -33,17 +33,17 @@ export function getNavigation(): NavCategory[] {
     if (!entry.isDirectory()) continue;
 
     const categoryDir = path.join(postsDir, entry.name);
-    const files = fs.readdirSync(categoryDir).filter((f) => f.endsWith(".md"));
+    const files = fs.readdirSync(categoryDir).filter(f => f.endsWith('.md'));
 
     const items: (NavItem & { order: number })[] = [];
     for (const file of files) {
-      const slug = file.replace(/\.md$/, "");
-      const raw = fs.readFileSync(path.join(categoryDir, file), "utf-8");
+      const slug = file.replace(/\.md$/, '');
+      const raw = fs.readFileSync(path.join(categoryDir, file), 'utf-8');
       const { data } = matter(raw);
       items.push({
-        title: typeof data.title === "string" ? data.title : slug,
+        title: typeof data.title === 'string' ? data.title : slug,
         slug,
-        order: typeof data.order === "number" ? data.order : 999,
+        order: typeof data.order === 'number' ? data.order : 999,
       });
     }
 
@@ -65,7 +65,7 @@ export function getNavigation(): NavCategory[] {
 
 /** Flat ordered list of all slugs for prev/next navigation */
 export function getAllSlugs(): string[] {
-  return getNavigation().flatMap((cat) => cat.items.map((item) => item.slug));
+  return getNavigation().flatMap(cat => cat.items.map(item => item.slug));
 }
 
 /** Get prev/next items relative to a given slug */
@@ -75,7 +75,7 @@ export function getPrevNext(slug: string) {
   const idx = allSlugs.indexOf(slug);
   if (idx === -1) return { prev: null, next: null };
 
-  const allItems = navigation.flatMap((cat) => cat.items);
+  const allItems = navigation.flatMap(cat => cat.items);
   return {
     prev: idx > 0 ? allItems[idx - 1] : null,
     next: idx < allItems.length - 1 ? allItems[idx + 1] : null,
