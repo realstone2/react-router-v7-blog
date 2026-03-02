@@ -12,7 +12,7 @@ export function DocsLayout({ children, toc }: DocsLayoutProps) {
   return (
     <div className="max-w-[1400px] mx-auto flex">
       {/* Sidebar — hidden on mobile */}
-      <aside className="hidden lg:block w-64 shrink-0 border-r border-gray-100 dark:border-gray-900 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
         <Sidebar />
       </aside>
 
@@ -23,7 +23,7 @@ export function DocsLayout({ children, toc }: DocsLayoutProps) {
         </main>
 
         {/* ToC — hidden below xl */}
-        <aside className="w-64 shrink-0 hidden xl:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto border-l border-gray-100 dark:border-gray-900">
+        <aside className="w-64 shrink-0 hidden xl:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto border-l border-gray-200 dark:border-gray-800">
           <TableOfContents items={toc} />
         </aside>
       </div>

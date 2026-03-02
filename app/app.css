@@ -8,7 +8,7 @@
 
 html,
 body {
-  @apply bg-white dark:bg-black text-gray-900 dark:text-gray-200 antialiased selection:bg-red-100 dark:selection:bg-red-500/30 selection:text-red-700 dark:selection:text-red-100;
+  @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 antialiased selection:bg-red-100 selection:text-red-700 dark:selection:bg-red-500/30 dark:selection:text-red-200;
 }
 
 .dark {
@@ -17,26 +17,26 @@ body {
 
 /* Prose / Typography styles for markdown content */
 .prose {
-  @apply text-gray-700 dark:text-gray-400 leading-relaxed font-sans;
+  @apply text-gray-700 dark:text-gray-300 leading-relaxed font-sans;
   max-width: none;
   font-size: 1rem;
   line-height: 1.8;
 }
 
 .prose h1 {
-  @apply font-heading text-4xl font-extrabold text-gray-900 dark:text-white mt-12 mb-6 tracking-tighter;
+  @apply font-heading text-4xl font-extrabold text-gray-900 dark:text-gray-100 mt-12 mb-6 tracking-tighter;
 }
 
 .prose h2 {
-  @apply font-heading text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-5 tracking-tight pb-3 border-b border-gray-100 dark:border-gray-900 scroll-mt-24;
+  @apply font-heading text-2xl font-bold text-gray-900 dark:text-gray-100 mt-12 mb-5 tracking-tight pb-3 border-b border-gray-200 dark:border-gray-800 scroll-mt-24;
 }
 
 .prose h3 {
-  @apply font-heading text-xl font-bold text-gray-900 dark:text-white mt-10 mb-4 tracking-tight scroll-mt-24;
+  @apply font-heading text-xl font-bold text-gray-900 dark:text-gray-100 mt-10 mb-4 tracking-tight scroll-mt-24;
 }
 
 .prose h4 {
-  @apply font-heading text-lg font-bold text-gray-900 dark:text-white mt-8 mb-3 tracking-tight;
+  @apply font-heading text-lg font-bold text-gray-900 dark:text-gray-100 mt-8 mb-3 tracking-tight;
 }
 
 .prose p {
@@ -44,15 +44,15 @@ body {
 }
 
 .prose a {
-  @apply text-red-600 dark:text-red-500 font-medium underline underline-offset-4 decoration-red-600/30 hover:decoration-red-600 transition-all duration-200;
+  @apply text-red-600 dark:text-red-400 font-medium underline underline-offset-4 decoration-red-600/30 dark:decoration-red-400/30 hover:decoration-red-600 dark:hover:decoration-red-400 transition-all duration-200;
 }
 
 .prose ul {
-  @apply list-disc list-outside pl-6 mb-6 space-y-2 marker:text-red-500/50;
+  @apply list-disc list-outside pl-6 mb-6 space-y-2 marker:text-red-500/50 dark:marker:text-red-400/50;
 }
 
 .prose ol {
-  @apply list-decimal list-outside pl-6 mb-6 space-y-2 marker:text-red-500/50;
+  @apply list-decimal list-outside pl-6 mb-6 space-y-2 marker:text-red-500/50 dark:marker:text-red-400/50;
 }
 
 .prose li > ul,
@@ -61,7 +61,7 @@ body {
 }
 
 .prose blockquote {
-  @apply border-l-4 border-red-500 pl-6 py-2 my-8 text-gray-800 dark:text-gray-300 bg-red-50/30 dark:bg-red-500/5 italic rounded-r-xl shadow-sm;
+  @apply border-l-4 border-red-500 dark:border-red-400 pl-6 py-2 my-8 text-gray-700 dark:text-gray-300 bg-red-50/40 dark:bg-red-500/10 italic rounded-r-xl shadow-sm;
 }
 
 .prose blockquote p {
@@ -69,12 +69,12 @@ body {
 }
 
 .prose code {
-  @apply bg-gray-100 dark:bg-gray-900 text-red-700 dark:text-red-400 rounded-md px-1.5 py-0.5 text-[0.875em] font-mono font-medium border border-gray-200/50 dark:border-gray-800/50;
+  @apply bg-gray-100 dark:bg-gray-800 text-red-700 dark:text-red-400 rounded-md px-1.5 py-0.5 text-[0.875em] font-mono font-medium border border-gray-200 dark:border-gray-700;
 }
 
-/* Shiki code blocks — dual theme support */
+/* Shiki code blocks */
 .prose pre {
-  @apply rounded-xl my-8 overflow-x-auto text-sm border border-gray-200 dark:border-gray-900 shadow-sm bg-gray-50 dark:bg-gray-950;
+  @apply rounded-xl my-8 overflow-x-auto text-sm border border-gray-200 dark:border-gray-800 shadow-sm bg-gray-50 dark:bg-gray-900;
   padding: 0;
 }
 
@@ -104,31 +104,31 @@ html.dark .shiki span {
 }
 
 .prose th {
-  @apply bg-gray-50 dark:bg-gray-900/50 font-bold text-left px-5 py-3 border border-gray-100 dark:border-gray-900 text-gray-900 dark:text-white uppercase tracking-wider;
+  @apply bg-gray-50 dark:bg-gray-900 font-bold text-left px-5 py-3 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 uppercase tracking-wider;
 }
 
 .prose td {
-  @apply px-5 py-3 border border-gray-100 dark:border-gray-900;
+  @apply px-5 py-3 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300;
 }
 
 .prose tr:nth-child(even) {
-  @apply bg-gray-50/30 dark:bg-gray-950/40;
+  @apply bg-gray-50/60 dark:bg-gray-900/50;
 }
 
 .prose hr {
-  @apply border-gray-100 dark:border-gray-900 my-12;
+  @apply border-gray-200 dark:border-gray-800 my-12;
 }
 
 .prose img {
-  @apply rounded-xl my-8 max-w-full shadow-lg border border-gray-100 dark:border-gray-900;
+  @apply rounded-xl my-8 max-w-full shadow-lg border border-gray-200 dark:border-gray-800;
 }
 
 .prose strong {
-  @apply font-bold text-gray-900 dark:text-white;
+  @apply font-bold text-gray-900 dark:text-gray-100;
 }
 
 .prose em {
-  @apply italic text-gray-800 dark:text-gray-300;
+  @apply italic text-gray-700 dark:text-gray-300;
 }
 
 /* Custom Scrollbar */
@@ -141,6 +141,5 @@ aside::-webkit-scrollbar-track {
 }
 
 aside::-webkit-scrollbar-thumb {
-  @apply bg-gray-200 dark:bg-gray-800 rounded-full hover:bg-red-500/20 transition-colors;
+  @apply bg-gray-200 dark:bg-gray-800 rounded-full hover:bg-red-400/40 dark:hover:bg-red-400/50 transition-colors;
 }
-
