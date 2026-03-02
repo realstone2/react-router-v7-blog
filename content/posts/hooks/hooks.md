@@ -71,6 +71,6 @@ order: 1
 
 | Hook | 설명 |
 |------|------|
-| `useBlocker` | 인앱 탐색을 차단하고 `proceed` / `reset` 제어권 제공 (미저장 변경사항 경고 등) |
+| `useBlocker` | 인앱 탐색을 차단하고 `proceed` / `reset` 제어권 제공 (미저장 변경사항 경고 등) — [실험 데모](/experiment/blocker) |
 | `useBeforeUnload` | 브라우저 `beforeunload` 이벤트 콜백 등록 |
 | `usePrompt` | `useBlocker` 기반 실험적 훅 — `window.confirm` 프롬프트 사용 |
