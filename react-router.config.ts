@@ -6,8 +6,16 @@ export default {
   ssr: true,
   async prerender() {
     const postsDir = path.join(process.cwd(), 'content', 'posts');
-    const files = fs.readdirSync(postsDir);
-    const slugs = files.filter(f => f.endsWith('.md')).map(f => f.replace(/\.md$/, ''));
+    const slugs: string[] = [];
+    for (const entry of fs.readdirSync(postsDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const categoryDir = path.join(postsDir, entry.name);
+      for (const file of fs.readdirSync(categoryDir)) {
+        if (file.endsWith('.md')) {
+          slugs.push(file.replace(/\.md$/, ''));
+        }
+      }
+    }
     return ['/', ...slugs.map(slug => `/posts/${slug}`)];
   },
 } satisfies Config;
