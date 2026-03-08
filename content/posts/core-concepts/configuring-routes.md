@@ -368,7 +368,94 @@ export function loader() {
 
 ---
 
-# 11. Component Routes — 컴포넌트 라우트
+# 11. relative() — 라우트 설정 파일 분리
+
+라우트 수가 많아지면 `routes.ts` 하나가 비대해진다.
+`relative()`를 사용하면 도메인별로 라우트 설정을 **여러 파일로 분리**할 수 있다.
+
+```typescript
+// app/routes.ts
+import { type RouteConfig } from "@react-router/dev/routes";
+import { authRoutes } from "./routes/auth.routes.ts";
+
+export default [
+  ...authRoutes,
+] satisfies RouteConfig;
+```
+
+```typescript
+// app/routes/auth.routes.ts
+import { relative } from "@react-router/dev/routes";
+
+const { route, layout, index } = relative(import.meta.dirname);
+
+export const authRoutes = [
+  layout("../auth/layout.tsx", [
+    route("login", "../auth/login.tsx"),
+    route("register", "../auth/register.tsx"),
+  ]),
+];
+```
+
+`relative(import.meta.dirname)`을 사용하면 해당 파일 위치 기준 상대 경로로 모듈을 참조할 수 있다.
+
+---
+
+# 12. 헬퍼 함수 선택 가이드
+
+각 헬퍼가 **URL 세그먼트 추가 여부**와 **공통 UI 렌더링 여부**로 구분된다.
+
+| 헬퍼 | URL 세그먼트 추가 | 공통 UI 렌더링 | loader/action |
+|---|---|---|---|
+| `route()` | O | O (Outlet) | O |
+| `index()` | X | O (Outlet) | O |
+| `layout()` | X | O (Outlet) | O |
+| `prefix()` | O | X | X |
+| `relative()` | — | — | — |
+
+### layout() vs 중첩 route()
+
+둘 다 공통 레이아웃을 `<Outlet />`으로 자식에게 제공한다. 차이는 URL에 세그먼트가 추가되느냐다.
+
+```typescript
+// 중첩 route() — URL에 "auth/"가 붙음
+route("auth", "./auth/layout.tsx", [
+  route("login", "./auth/login.tsx"),    // /auth/login
+  route("register", "./auth/register.tsx"), // /auth/register
+])
+
+// layout() — URL에 아무것도 추가되지 않음
+layout("./auth/layout.tsx", [
+  route("login", "./auth/login.tsx"),    // /login
+  route("register", "./auth/register.tsx"), // /register
+])
+```
+
+> **URL에 경로도 추가해야 하면** 중첩 `route()`, **UI만 공유하고 URL은 그대로 두려면** `layout()`
+
+### prefix() vs 중첩 route()
+
+둘 다 URL에 공통 접두사를 추가한다. 차이는 라우트 트리에 부모 노드가 생기느냐다.
+
+```typescript
+// 중첩 route() — 부모 노드 생성, layout.tsx가 렌더링됨
+route("concerts", "./concerts/layout.tsx", [
+  index("./concerts/home.tsx"),          // /concerts
+  route(":city", "./concerts/city.tsx"), // /concerts/:city
+])
+
+// prefix() — 부모 노드 없음, URL만 묶기
+...prefix("concerts", [
+  index("./concerts/home.tsx"),          // /concerts
+  route(":city", "./concerts/city.tsx"), // /concerts/:city
+])
+```
+
+> **공통 레이아웃이나 loader가 필요하면** 중첩 `route()`, **URL 그룹핑만 하려면** `prefix()`
+
+---
+
+# 13. Component Routes — 컴포넌트 라우트
 
 `routes.ts` 밖에서, 컴포넌트 트리 내부에 직접 라우트를 선언하는 방식이다.
 
