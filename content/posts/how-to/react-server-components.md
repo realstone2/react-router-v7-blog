@@ -16,12 +16,7 @@ description: 'React Router v7에서 React Server Components(RSC) 활성화, Serv
 
 React Server Components(RSC)는 컴포넌트를 서버에서만 실행하고, 직렬화된 React 트리(React Flight 프로토콜)를 클라이언트로 스트리밍하는 아키텍처다. HTML이 아니라 컴포넌트 트리를 보내기 때문에 클라이언트 React가 점진적으로 재구성할 수 있다.
 
-React Router v7은 두 가지 방식으로 RSC를 지원한다:
-
-1. **Framework Mode** — `unstable_reactRouterRSC` Vite 플러그인 사용
-2. **Data Mode** — `@vitejs/plugin-rsc` 기반의 저수준 API
-
-이 글은 Framework Mode 중심으로 설정 방법과 핵심 패턴을 정리한다.
+React Router v7은 Framework Mode에서 `unstable_reactRouterRSC` Vite 플러그인을 통해 RSC를 지원한다. 이 글은 설정 방법과 핵심 패턴을 정리한다.
 
 ---
 
@@ -30,14 +25,10 @@ React Router v7은 두 가지 방식으로 RSC를 지원한다:
 ## 템플릿으로 시작
 
 ```bash
-# Framework Mode
 npx create-react-router@latest --template remix-run/react-router-templates/unstable_rsc-framework-mode
-
-# Data Mode (Vite)
-npx create-react-router@latest --template remix-run/react-router-templates/unstable_rsc-data-mode-vite
 ```
 
-## Vite 설정 — Framework Mode
+## Vite 설정
 
 RSC Framework Mode는 기존 Framework Mode와 **다른 Vite 플러그인**(`unstable_reactRouterRSC`)을 사용한다. `@vitejs/plugin-rsc`가 피어 의존성으로 필요하며, React Router RSC 플러그인 **뒤에** 배치해야 한다.
 
@@ -56,28 +47,6 @@ export default defineConfig({
 ```
 
 필요한 의존성: `vite`, `@vitejs/plugin-react`, `@vitejs/plugin-rsc`
-
-## Vite 설정 — Data Mode
-
-```typescript
-// vite.config.ts
-import rsc from "@vitejs/plugin-rsc/plugin";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [
-    react(),
-    rsc({
-      entries: {
-        client: "src/entry.browser.tsx",
-        rsc: "src/entry.rsc.tsx",
-        ssr: "src/entry.ssr.tsx",
-      },
-    }),
-  ],
-});
-```
 
 ## Scripts 컴포넌트 제거
 
@@ -267,7 +236,6 @@ React Router RSC는 아직 **unstable** API다:
 
 - **미지원 기능**: SPA Mode, pre-rendering, custom build entries (안정 릴리스 전 지원 예정)
 - 프로덕션 사용보다는 실험/피드백 단계
-- 기존 Framework Mode나 Data/Declarative API 사용이 현재로서는 권장됨
 
 그럼에도 RSC 아키텍처를 미리 파악하고 싶다면 unstable 템플릿으로 시작해보는 것을 추천한다.
 
