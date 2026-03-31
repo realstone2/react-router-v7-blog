@@ -51,8 +51,47 @@ export default {
 ## 동작 방식
 
 - 라우트 트리의 **주소를 가진(addressable) 라우트**마다 호출된다 (경로 없는 레이아웃 라우트는 제외)
-- 반환값은 **서버 번들 ID**로, 빌드 디렉토리 내 폴더명이 된다
 - `branch` 파라미터는 해당 라우트까지의 경로에 있는 라우트 배열이다
+- 반환값은 **서버 번들 ID**로, `build/server/` 아래 디렉토리명이 된다. 같은 ID를 반환한 라우트끼리 하나의 번들로 묶인다
+
+### 예시 코드 해석
+
+위 코드의 라우트 구조가 다음과 같다고 가정하면:
+
+```
+app/routes/
+├── home.tsx
+├── about.tsx
+├── _authenticated/          ← 폴더
+│   ├── dashboard.tsx
+│   └── settings.tsx
+```
+
+`serverBundles` 함수가 라우트마다 호출될 때:
+
+```typescript
+// /home → branch: [{ id: "routes/home" }]
+"routes/home".split("/") → ["routes", "home"]
+.includes("_authenticated") → false
+→ return "unauthenticated"
+
+// /dashboard → branch: [{ id: "routes/_authenticated/dashboard" }]
+"routes/_authenticated/dashboard".split("/") → ["routes", "_authenticated", "dashboard"]
+.includes("_authenticated") → true
+→ return "authenticated"
+```
+
+반환된 문자열이 빌드 폴더명이 된다:
+
+```
+build/server/
+├── unauthenticated/
+│   └── index.js      ← home, about 라우트만 포함
+└── authenticated/
+    └── index.js      ← dashboard, settings 라우트만 포함
+```
+
+문자열 자체는 임의의 값이다. `"a"`, `"public"` 등 무엇이든 상관없고, 같은 문자열을 반환한 라우트가 같은 번들로 묶이는 **그룹 키** 역할을 한다.
 
 ## branch 배열의 route 속성
 

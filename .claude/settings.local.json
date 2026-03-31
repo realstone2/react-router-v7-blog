@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_oh-my-claudecode_team__omc_run_team_start"
+      "mcp__plugin_oh-my-claudecode_team__omc_run_team_start",
+      "mcp__context7__query-docs"
     ]
   }
 }
